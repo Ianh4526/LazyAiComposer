@@ -25,15 +25,16 @@ def train_network():
 
 def get_notes():
     # Get all the notes and chords from the MIDI files in the ./midi directory
-    print("Getting Notes")
+
     notes = []
     counter = 1
 
     for file in glob.glob("midi_songs/*.mid"):
         midi = converter.parse(file)
+
         print("N° {} Parsing {}".format(counter,file))
         notes_to_parse = None
-        counter = counter+1
+        counter = counter +1
         try: #the file has instrument parts
             s2 = instrument.partitionByInstrument(midi)
             notes_to_parse = s2.parts[0].recurse()
@@ -45,17 +46,16 @@ def get_notes():
                 notes.append(str(element.pitch))
             elif isinstance(element, chord.Chord):
                 notes.append('.'.join(str(n)for n in element.normalOrder))
-    with open('data/notes','wb') as filepath:
+    with open("data/notes",'wb') as filepath:
         pickle.dump(notes, filepath)
 
     return notes
 
 def prepare_sequences(notes, n_vocab):
     #prepare the sequences used by te NN
-    print("Preparing Sequences")
     sequence_length = 100
     #get all the pitch names
-    pitchnames = sorted(set(item for item in notes))
+    pitchnames = sorted(set(item for item in noes))
     #Create a dictionary to map pitches to integers
     note_to_int = dict((note, number) for number, note in enumerate(pitchnames))
 
@@ -66,7 +66,7 @@ def prepare_sequences(notes, n_vocab):
     for i in range(0, len(notes) - sequence_length, 1):
         sequence_in = notes[i:i + sequence_length]
         sequence_out = notes[i + sequence_length]
-        network_input.append([note_to_int[char] for char in sequence_in])
+        network_input.append[(note_to_int[char] for char in sequence_in)]
         network_output.append(note_to_int[sequence_out])
 
     n_patterns = len(network_input)
@@ -83,7 +83,6 @@ def prepare_sequences(notes, n_vocab):
 
 def create_network(network_input, n_vocab):
     #Create the structure of the NN
-    print("Creating NN")
     model = Sequential()
     model.add(LSTM(
         512,
@@ -107,7 +106,6 @@ def create_network(network_input, n_vocab):
 
 def train(model, network_input, network_output):
     #Train the NN
-    print("Training NN")
     filepath = "weights-improvement-{epoch:02d}-{loss:.4f}-bigger.hdf5"
     checkpoint = ModelCheckpoint(filepath,
         monitor='val_loss',
